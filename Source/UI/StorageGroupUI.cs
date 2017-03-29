@@ -119,7 +119,7 @@ namespace ChangeDresser.UI
                 GUI.EndGroup();
 
                 List<Apparel> possibleApparel = (this.ApparelFrom == ApparelFromEnum.Pawn) ? this.Pawn.apparel.WornApparel : this.Dresser.StoredApparel;
-                List<Apparel> groupApparel = this.StorageGroupDto.Apparel;
+                List<StoredApparelDTO> groupApparel = this.StorageGroupDto.Apparel;
 
                 GUI.BeginGroup(new Rect(0, 90, inRect.width, 30));
                 GUI.Label(new Rect(0, 0, 100, 30), ((string)((this.ApparelFrom == ApparelFromEnum.Pawn) ? "ChangeDresser.Worn" : "ChangeDresser.Storage")).Translate(), WidgetUtil.MiddleCenter);
@@ -156,7 +156,7 @@ namespace ChangeDresser.UI
                         {
                             this.RemoveApparelFromSender(apparel);
                             apparel.wearer = null;
-                            groupApparel.Add(apparel);
+                            groupApparel.Add(new StoredApparelDTO(apparel, false));
                             GUI.EndGroup();
                             break;
                         }
@@ -181,13 +181,13 @@ namespace ChangeDresser.UI
                 Text.Font = GameFont.Medium;
                 for (int i = 0; i < groupApparel.Count; ++i)
                 {
-                    Apparel apparel = groupApparel[i];
+                    Apparel apparel = groupApparel[i].Apparel;
                     Rect rowRect = new Rect(0, 2f + i * cellHeight, apparelListRect.width, cellHeight);
                     GUI.BeginGroup(rowRect);
 
                     if (Widgets.ButtonImage(new Rect(5, 10, 20, 20), WidgetUtil.previousTexture))
                     {
-                        groupApparel.Remove(apparel);
+                        groupApparel.RemoveAt(i);
                         this.AddApparelToSender(apparel);
                         GUI.EndGroup();
                         break;
@@ -196,7 +196,12 @@ namespace ChangeDresser.UI
                     Widgets.ThingIcon(new Rect(35f, 0f, cellHeight, cellHeight), apparel);
                     Text.Font = GameFont.Small;
                     Text.Anchor = TextAnchor.MiddleCenter;
-                    Widgets.Label(new Rect(cellHeight + 45f, 0f, rowRect.width - cellHeight - 45f, cellHeight), apparel.Label);
+                    string label = apparel.Label;
+                    if (groupApparel[i].IsForced)
+                    {
+                        label += " (" + "ApparelForcedLower".Translate() + ")";
+                    }
+                    Widgets.Label(new Rect(cellHeight + 45f, 0f, rowRect.width - cellHeight - 45f, cellHeight), label);
 
                     GUI.EndGroup();
                 }
@@ -214,9 +219,9 @@ namespace ChangeDresser.UI
                 Rect rightButton = new Rect(middle + 10, 0, 100, 30);
                 if (IsNew && Widgets.ButtonText(rightButton, "ChangeDresser.Cancel".Translate()))
                 {
-                    foreach(Apparel apparel in this.StorageGroupDto.Apparel)
+                    foreach(StoredApparelDTO apparel in this.StorageGroupDto.Apparel)
                     {
-                        this.AddApparelToSender(apparel);
+                        this.AddApparelToSender(apparel.Apparel);
                     }
                     this.Dresser.Remove(this.StorageGroupDto);
                     this.Close();
@@ -280,6 +285,19 @@ namespace ChangeDresser.UI
             for (int i = worn.Count - 1; i >= 0; i--)
             {
                 Apparel apparel = worn[i];
+                if (!ApparelUtility.CanWearTogether(newApparel.def, apparel.def))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private bool CanWear(List<StoredApparelDTO> worn, Apparel newApparel)
+        {
+            for (int i = worn.Count - 1; i >= 0; i--)
+            {
+                Apparel apparel = worn[i].Apparel;
                 if (!ApparelUtility.CanWearTogether(newApparel.def, apparel.def))
                 {
                     return false;

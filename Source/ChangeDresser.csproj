@@ -83,6 +83,7 @@
     <Compile Include="UI\DTO\SelectionWidgetDTOs\HeadTypeSelectionDTO.cs" />
     <Compile Include="UI\DTO\SelectionWidgetDTOs\SliderWidgetDTO.cs" />
     <Compile Include="DresserJobDriver\SwapApparelJob.cs" />
+    <Compile Include="UI\DTO\StorageDTOs\StoredApparelDTO.cs" />
     <Compile Include="UI\Enums\CurrentEditorEnum.cs" />
     <Compile Include="UI\DTO\SelectionWidgetDTOs\ASelectionWidgetDTO.cs" />
     <Compile Include="UI\DTO\SelectionWidgetDTOs\SelectionColorWidgetDTO.cs" />

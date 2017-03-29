@@ -31,7 +31,7 @@ namespace ChangeDresser.UI.DTO.StorageDTOs
     public class StorageGroupDTO : IExposable
     {
 
-        private List<Apparel> apparelList = new List<Apparel>();
+        private List<StoredApparelDTO> apparelList = new List<StoredApparelDTO>();
         private string name = "";
         private string restrictToPawnId = "";
         private string restrictToPawnName = "";
@@ -46,9 +46,6 @@ namespace ChangeDresser.UI.DTO.StorageDTOs
         {
             this.Id = idCount;
             ++idCount;
-#if (CHANGE_DRESSER_DEBUG)
-            Log.Message("StorageGroupDTO Id: " + this.Id);
-#endif
         }
 
         public bool HasName()
@@ -83,49 +80,41 @@ namespace ChangeDresser.UI.DTO.StorageDTOs
             Scribe_Values.LookValue<string>(ref this.isBeingWornByName, "isBeingWornByName", "", false);
             Scribe_Collections.LookList(ref this.apparelList, "apparelList", LookMode.Deep, new object[0]);
 
-#if (CHANGE_DRESSER_DEBUG)
-            Log.Message(this.ToString());
-#endif
             if (this.ForceSwitchBattle)
             {
                 StorageGroupDTO dto;
                 if (!BattleApparelGroupDTO.TryGetBattleApparelGroupForPawn(this.restrictToPawnId, out dto))
                 {
-#if (CHANGE_DRESSER_DEBUG)
-                    Log.Message("StorageGroup.ExposeData: Add StorageGroupDTO to BattleApparelGroupDTO");
-#endif
                     BattleApparelGroupDTO.AddBattleGroup(this);
                 }
-                else
-                {
-#if (CHANGE_DRESSER_DEBUG)
-                    Log.Message("StorageGroup.ExposeData: BattleApparelGroupDTO already has dto");
-#endif
-                }
             }
-#if (CHANGE_DRESSER_DEBUG)
-            else
-            {
-                Log.Message("StorageGroup.ExposeData: NOT adding StorageGroupDTO to BattleApparelGroupDTO");
-            }
-#endif
         }
 
         public void SwapWith(Pawn pawn)
         {
             List<Apparel> wasWearing = new List<Apparel>(pawn.apparel.WornApparel);
+            List<Apparel> forcedApparel = new List<Apparel>(pawn.outfits.forcedHandler.ForcedApparel);
+
             foreach (Apparel a in wasWearing)
             {
                 pawn.apparel.Remove(a);
             }
 
-            foreach (Apparel a in this.apparelList)
+            foreach (StoredApparelDTO a in this.apparelList)
             {
-                pawn.apparel.Wear(a);
+                pawn.apparel.Wear(a.Apparel);
+                if (a.IsForced)
+                {
+                    pawn.outfits.forcedHandler.SetForced(a.Apparel, true);
+                }
             }
 
             this.apparelList.Clear();
-            this.apparelList = wasWearing;
+            foreach (Apparel a in wasWearing)
+            {
+                this.apparelList.Add(new StoredApparelDTO(a, forcedApparel.Contains(a)));
+            }
+
             if (this.IsBeingWorn)
             {
                 this.isBeingWornById = "";
@@ -169,7 +158,7 @@ namespace ChangeDresser.UI.DTO.StorageDTOs
             }
         }
 
-        public List<Apparel> Apparel { get { return this.apparelList; } }
+        public List<StoredApparelDTO> Apparel { get { return this.apparelList; } }
 
         public bool IsRestricted
         {

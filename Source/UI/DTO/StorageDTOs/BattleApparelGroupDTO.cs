@@ -26,9 +26,6 @@ using Verse;
 
 namespace ChangeDresser.UI.DTO.StorageDTOs
 {
-    /// <summary>
-    /// This class is not used by default. This is used to expose extra functionality for other mods - specifically ChangeDresserDraftSwitch
-    /// </summary>
     public static class BattleApparelGroupDTO
     {
         private static readonly Dictionary<string, StorageGroupDTO> PawnIdBattleStorageGroups = new Dictionary<string, StorageGroupDTO>();

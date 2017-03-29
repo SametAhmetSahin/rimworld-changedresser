@@ -122,6 +122,14 @@ namespace ChangeDresser
             }
         }
 
+        private void DropApparel(List<StoredApparelDTO> apparel)
+        {
+            foreach (StoredApparelDTO a in apparel)
+            {
+                this.DropApparel(a.Apparel);
+            }
+        }
+
         private void DropApparel(Apparel a, bool makeForbidden = true)
         {
             try
