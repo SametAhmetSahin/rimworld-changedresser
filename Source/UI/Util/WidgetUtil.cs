@@ -120,7 +120,8 @@ namespace ChangeDresser.UI.Util
             GUI.color = Color.white;
             if (GUI.RepeatButton(colorPickerRect, colorPickerTexture, GUI.skin.label))
             {
-                SetColorToSelected(selectionDtos, presetsDto, GetColorFromTexture(Event.current.mousePosition, colorPickerRect, colorPickerTexture));
+                // TODO add this line in when textures can be read
+                //SetColorToSelected(selectionDtos, presetsDto, GetColorFromTexture(Event.current.mousePosition, colorPickerRect, colorPickerTexture));
             }
 
             GUI.BeginGroup(new Rect(0, colorPickerRect.height + 30f, width, 20f));
